@@ -1,42 +1,47 @@
 
-import sys
-import cv2 as cv
-def main(argv):
-    print("""
-    Zoom In-Out demo
-    ------------------
-    * [i] -> Zoom [i]n
-    * [o] -> Zoom [o]ut
-    * [ESC] -> Close program
-    """)
-    
-    filename = argv[0] if len(argv) > 0 else "../data/chicky_512.png"
-    # Load the image
-    src = cv.imread(filename)
-    # Check if image is loaded fine
-    if src is None:
-        print ('Error opening image!')
-        print ('Usage: pyramids.py [image_name -- default ../data/chicky_512.png] \n')
-        return -1
-    
-    while 1:
-        rows, cols, _channels = map(int, src.shape)
-        
-        cv.imshow('Pyramids Demo', src)
-        
-        k = cv.waitKey(0)
-        if k == 27:
-            break
-            
-        elif chr(k) == 'i':
-            src = cv.pyrUp(src, dstsize=(2 * cols, 2 * rows))
-            print ('** Zoom In: Image x 2')
-            
-        elif chr(k) == 'o':
-            src = cv.pyrDown(src, dstsize=(cols // 2, rows // 2))
-            print ('** Zoom Out: Image / 2')
-            
-    cv.destroyAllWindows()
-    return 0
-if __name__ == "__main__":
-    main(sys.argv[1:])
+import cv2
+import numpy as np,sys
+
+A = cv2.imread('1.png')
+B = cv2.imread('3.png')
+
+# generate Gaussian pyramid for A
+G = A.copy()
+gpA = [G]
+for i in range(6):
+   G = cv2.pyrDown(G)
+   gpA.append(G)
+# generate Gaussian pyramid for B
+G = B.copy()
+gpB = [G]
+for i in range(6):
+   G = cv2.pyrDown(G)
+   gpB.append(G)
+# generate Laplacian Pyramid for A
+lpA = [gpA[5]]
+for i in range(5,0,-1):
+	GE = cv2.pyrUp(gpA[i])
+	L = cv2.subtract(gpA[i-1],GE)
+	lpA.append(L)
+# generate Laplacian Pyramid for B
+lpB = [gpB[5]]
+for i in range(5,0,-1):
+	GE = cv2.pyrUp(gpB[i])
+	L = cv2.subtract(gpB[i-1],GE)
+	lpB.append(L)
+# Now add left and right halves of images in each level
+LS = []
+for la,lb in zip(lpA,lpB):
+	rows,cols,dpt = la.shape
+	ls = np.hstack((la[:,0:cols/2], lb[:,cols/2:]))
+	LS.append(ls)
+# now reconstruct
+ls_ = LS[0]
+for i in range(1,6):
+	ls_ = cv2.pyrUp(ls_)
+	ls_ = cv2.add(ls_, LS[i])
+
+# image with direct connecting each half
+real = np.hstack((A[:,:cols/2],B[:,cols/2:])) 
+cv2.imwrite('Pyramid_blending2.jpg',ls_)
+cv2.imwrite('Direct_blending.jpg',real)
