@@ -1,18 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Thu Aug 16 13:19:26 2018
-
-@author: robotica
-"""
-#Replica a primeira linha
-#x = np.append([x[0][:]],x,axis =0)
-#Adciona na ultima linha
-#x = np.append(x,[x[-1][:]],axis =0)
-#Adciona na primeira Coluna
-#x = np.append(np.transpose([x[:,0]]),x, axis=1)
-#Adciona na ultima coluna
-#np.append(x, np.transpose([x[:,-1]]), axis=1)
 import numpy as np
 import math
 
@@ -57,12 +44,15 @@ def Sobel(image,M = "x"):
         matrix = np.array([[-1,0,1],[-2,0,2],[-1,0,1]])
     elif(M == "y"):
         matrix = np.array([[1,2,1],[0,0,0],[-1,-2,-1]])
-    for x in range (1,h):
-        for y in range(1,w):
-            if(sum(sum(matrix*image[x-1:x+2,y-1:y+2])) > 0):
-                newimg[x-1,y-1] = sum(sum(matrix*image[x-1:x+2,y-1:y+2]))
+    for x in range (0,h):
+        for y in range(0,w):
+            if(sum(sum(matrix*image[x:x+3,y:y+3])) > 0):
+                if(sum(sum(matrix*image[x:x+3,y:y+3])) > 255):
+                    newimg[x,y] = 255
+                else:
+                    newimg[x,y] = sum(sum(matrix*image[x:x+3,y:y+3]))
             else:
-                newimg[x-1,y-1] = 0
+                newimg[x,y] = 0
     return newimg
 
 def Laplacian(image):
@@ -72,15 +62,17 @@ def Laplacian(image):
     image = np.append(image,[image[-1][:]],axis =0)
     image = np.append(np.transpose([image[:,0]]),image, axis=1)
     image = np.append(image, np.transpose([image[:,-1]]), axis=1)
-    matrix = np.array([[0,1,0],[1,-4,1],[0,1,0]])
-    for x in range (1,h):
-        for y in range(1,w):
-            if(sum(sum(matrix*image[x-1:x+2,y-1:y+2])) > 0):
-                newimg[x-1,y-1] = sum(sum(matrix*image[x-1:x+2,y-1:y+2]))
+    matrix = np.array([[0,-1,0],[-1,4,-1],[0,-1,0]])
+    for x in range (0,h):
+        for y in range(0,w):
+            if(sum(sum(matrix*image[x:x+3,y:y+3])) > 0):
+                if(sum(sum(matrix*image[x:x+3,y:y+3])) > 255):
+                    newimg[x,y] = 255
+                else:
+                    newimg[x,y] = sum(sum(matrix*image[x:x+3,y:y+3]))
             else:
-                newimg[x-1,y-1] = 0
+                newimg[x,y] = 0
     return newimg
-
 
 def Median(image):
     newimg = np.copy(image)
@@ -110,12 +102,12 @@ def Gaussian(image):
     image = np.append(np.transpose([image[:,0]]),image, axis=1)
     image = np.append(image, np.transpose([image[:,-1]]), axis=1)
     matrix = np.array([[1,2,1],[2,4,2],[1,2,1]])
-    for x in range (1,h+1):
-        for y in range(1,w+1):
-            if(int(sum(sum(matrix*image[x-1:x+2,y-1:y+2]))/16) > 0):
-                newimg[x-1,y-1] = int(sum(sum(matrix*image[x-1:x+2,y-1:y+2]))/16)
+    for x in range (0,h):
+        for y in range(0,w):
+            if(int(sum(sum(matrix*image[x:x+3,y:y+3]))/16) > 0):
+                newimg[x,y] = int(sum(sum(matrix*image[x:x+3,y:y+3]))/16)
             else:
-                newimg[x-1,y-1] = 0
+                newimg[x,y] = 0
     return newimg
 
 def Gaussian2(image):
@@ -145,65 +137,87 @@ def choice(img,x,y,i,f):
         return f
 
 def suprimir(img,x,y,ang):
-    if(ang == 1):
-        if((img[x,y]>img[x,y+1]) and (img[x,y]>img[x,y-1])):
-            return 255 #choice(img,x,y,t1,t2)
+    if(ang == 0):
+        if((img[x,y]>img[x,y+1]) and (img[x,y]>=img[x,y-1])):
+            return img[x,y] 
         else:
             return 0
-    elif(ang == 2):
-        if((img[x,y]>img[x+1,y+1]) and (img[x,y]>img[x-1,y-1])):
-            return 255 #choice(img,x,y,t1,t2)
+    elif(ang == 45):
+        if((img[x,y]>img[x+1,y-1]) and (img[x,y]>img[x-1,y+1])):
+            return img[x,y]
         else:
             return 0
-    elif(ang == 3):
-        if((img[x+1,y]>img[x,y]) and (img[x-1,y]>img[x,y])):
-            return 255 #choice(img,x,y,t1,t2)
+    elif(ang == 90):
+        if((img[x,y]>img[x+1,y]) and (img[x,y]>=img[x-1,y])):
+            return img[x,y]
         else:
             return 0
-    elif(ang == 4):
-        if((img[x,y]>img[x-1,y+1]) and (img[x,y]>img[x+1,y-1])):
-            return 255 #choice(img,x,y,t1,t2)
+    elif(ang == 135):
+        if((img[x,y]>img[x-1,y-1]) and (img[x,y]>img[x+1,y+1])):
+            return img[x,y]
         else:
             return 0
-    else:
-        if((img[x,y]>img[x,y+1]) and (img[x,y]>img[x,y-1])):
-            return 255 #choice(img,x,y,t1,t2)
-        else:
-            return 0
-
-def Canny(image):
+        
+def Canny(image,t1,t2):
     Gaussiana = np.copy(image)
     Gaussiana = Gaussian(Gaussiana)
+    Laplaciano = np.sqrt(Laplacian(Gaussiana))
     h,w = Gaussiana.shape
     Gx = Sobel(Gaussiana,"x")
     Gy = Sobel(Gaussiana,"y")
-    theta = np.arctan(Gy/Gx)
+    theta = np.arctan2(Gy,Gx)
     theta[np.isnan(theta)]= 0
     t = np.copy(theta)
+    #Non-max supression
     for x in range (0,h):
         for y in range(0,w):
-            if(theta[x,y]<=math.pi/16):
-                t[x,y] = 1
-            elif(theta[x,y]<3*math.pi/16):
-                t[x,y] = 2
-            elif(theta[x,y]<5*math.pi/16):
-                t[x,y] = 3
-            elif(theta[x,y]<7*math.pi/16):
-                t[x,y] = 4
+            if(theta[x,y]<=math.pi/8):
+                t[x,y] = 0
+            elif(theta[x,y]<=3*math.pi/8):
+                t[x,y] = 45
+            elif(theta[x,y]<=5*math.pi/8):
+                t[x,y] = 90
+            elif(theta[x,y]<=7*math.pi/8):
+                t[x,y] = 135
             else:
-                t[x,y] = 5
-    Laplaciano = Laplacian(Gaussiana)
+                t[x,y] = 0
     temp = np.zeros((h,w), dtype=np.uint8)
     for x in range (1,h-1):
         for y in range(1,w-1):
             temp[x,y] =  suprimir(Laplaciano,x,y,t[x,y])
-    outputimg = np.copy(temp)        
-    for x in range (1,h-2):
-        for y in range(1,w-2):
-            aux = temp[x-1:x+2,y-1:y+2]
-            if(np.count_nonzero(aux == 0)==1):
-                outputimg[x,y]=0
-    return outputimg
+    temp[:,0] = temp[:,1]
+    temp[:,-1] = temp[:,-2]
+    temp[0,:] = temp[1,:]
+    temp[-1,:] = temp[-2,:]
+    
+    #Normalizando
+    Laplaciano = (255/np.max(Laplaciano))*Laplaciano
+    # Double Thresholnding
+    #a)
+    classifier = np.zeros((h,w))
+    for x in range (0,h):
+        for y in range(0,w):
+            if(Laplaciano[x,y]<t1):
+                classifier[x,y] = 0
+            elif(Laplaciano[x,y]<t2):
+                classifier[x,y] = 1
+            else:
+                classifier[x,y] = 2
+    #b) 
+    supression = np.zeros((h,w), dtype=np.uint8)     
+    for x in range (1,h-1):
+        for y in range(1,w-1):
+            if(classifier[x,y] == 0):
+                supression[x,y] = 0
+            elif(classifier[x,y] == 1):
+                aux = classifier[x-1:x+2,y-1:y+2]
+                if((aux == 0).sum() == 8):
+                    supression[x,y] = 0
+                else:
+                    supression[x,y] = 255
+            else:
+                supression[x,y] = 255
+    return Gx,Gy,theta,Gaussiana,Laplaciano,supression
 
 def Laplacian2(image,h,w):
     newimg = np.copy(image)
@@ -212,11 +226,3 @@ def Laplacian2(image,h,w):
         for y in range(1,w-2):
             newimg[x,y] = sum(sum(matrix*image[x-1:x+2,y-1:y+2]))
     return newimg
-
-
-
-
-
-
-
-

@@ -62,11 +62,20 @@ cv2.imwrite("Laplacian.jpg",newimg)
 
 #Canny
 image = cv2.imread("lena.jpg",0)
-t1 = filters.Canny(image)
-cv2.imwrite("Canny.jpg",t1)
-ref = cv2.Canny(image,0,0)
-cv2.imwrite("Canny-OpenCV.jpg",ref)
+#
+image = cv2.imread("135.png",0)
+#Laplaciano do Gaussiano
+GaussianaOpencv = cv2.filter2D(image,-1,np.array([[1,2,1],[2,4,2],[1,2,1]])/16)
+Gaussiana = filters.Gaussian(image)
+LapGasOpenCV = cv2.filter2D(GaussianaOpencv,-1,np.array([[0,-1,0],[-1,4,-1],[0,-1,0]]))
+LapGas = filters.Laplacian(Gaussiana)
+cv2.imwrite("Laplaciana da Gaussiana-OpenCV.jpg",LapGasOpenCV)
+#cv2.imwrite("Laplaciana da Gaussiana.jpg",Laplaciano)
 
+Gx,Gy,theta,Gaussiana,Laplaciano,supression = filters.Canny(image,100,200)
+cv2.imwrite("Canny.jpg",supression)
+ref = cv2.Canny(image,100,200)
+cv2.imwrite("Canny-OpenCV.jpg",ref)
 
 #Média
 dst = cv2.filter2D(image,-1,np.array([[1,1,1],[1,1,1],[1,1,1]])/9)
