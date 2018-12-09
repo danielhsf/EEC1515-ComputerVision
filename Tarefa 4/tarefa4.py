@@ -3,8 +3,15 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 img = cv2.imread('volkswagen.jpg',0)
+color = cv2.imread('volkswagen.jpg')
+
+#
+color = cv2.cvtColor(color,cv2.COLOR_BGR2RGB)
+#
 img2 = img.copy()
+
 template = cv2.imread('mask.jpg',0)
+
 w, h = template.shape[::-1]
 
 # All the 6 methods for comparison in a list
@@ -25,13 +32,13 @@ for meth in methods:
     else:
         top_left = max_loc
     bottom_right = (top_left[0] + w, top_left[1] + h)
-
-    cv2.rectangle(img,top_left, bottom_right, 255, 2)
+    print(top_left)
+    cv2.rectangle(color,top_left, bottom_right, 255, 3)
 
     plt.subplot(121),plt.imshow(res,cmap = 'gray')
-    plt.title('Matching Result'), plt.xticks([]), plt.yticks([])
-    plt.subplot(122),plt.imshow(img,cmap = 'gray')
-    plt.title('Detected Point'), plt.xticks([]), plt.yticks([])
+    plt.title('Resultado do Matching'), plt.xticks([]), plt.yticks([])
+    plt.subplot(122),plt.imshow(color)
+    plt.title('Local Detectado'), plt.xticks([]), plt.yticks([])
     plt.suptitle(meth)
     plt.savefig(meth+".png")
     plt.show()
