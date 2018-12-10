@@ -10,7 +10,7 @@ color = cv2.cvtColor(color,cv2.COLOR_BGR2RGB)
 #
 img2 = img.copy()
 
-template = cv2.imread('mask.jpg',0)
+template = cv2.imread('template.jpg',0)
 
 w, h = template.shape[::-1]
 
@@ -23,6 +23,7 @@ for meth in methods:
     method = eval(meth)
 
     # Apply template Matching
+    
     res = cv2.matchTemplate(img,template,method)
     min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
 
